@@ -29,7 +29,14 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
 
-        
+        //Data collection
+        const foodCollection = client.db('RestaurantManagement').collection('foods')
+
+        app.post('/foods', async (req, res) => {
+            const foodData = req.body
+            const result = await foodCollection.insertOne(foodData)
+            res.send(result)
+        })
 
 
         // Send a ping to confirm a successful connection
