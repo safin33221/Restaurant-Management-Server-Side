@@ -31,7 +31,12 @@ async function run() {
 
         //Data collection
         const foodCollection = client.db('RestaurantManagement').collection('foods')
-
+        //get Foods Data from DB
+        app.get('/foods', async (req, res) => {
+            const result = await foodCollection.find().toArray()
+            res.send(result)
+        })
+        //add Foods data in db
         app.post('/foods', async (req, res) => {
             const foodData = req.body
             const result = await foodCollection.insertOne(foodData)
