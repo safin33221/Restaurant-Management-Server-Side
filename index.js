@@ -42,8 +42,15 @@ async function run() {
         //get single food by id
         app.get('/food/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id:new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await foodCollection.findOne(query)
+            res.send(result)
+        })
+        //get food data by email
+        app.get('/my-foods/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email: email }
+            const result = await foodCollection.find(query).toArray()
             res.send(result)
         })
 
@@ -53,6 +60,9 @@ async function run() {
             const result = await foodCollection.insertOne(foodData)
             res.send(result)
         })
+
+
+        
 
 
         // Send a ping to confirm a successful connection
