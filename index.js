@@ -30,7 +30,13 @@ async function run() {
         // await client.connect();
 
         //Data collection
+
+
+        //FoodCollection
         const foodCollection = client.db('RestaurantManagement').collection('foods')
+
+        //Food Parchase collection
+        const foodParchaseColleciton = client.db('RestaurantManagement').collection('parchase')
 
 
 
@@ -65,6 +71,13 @@ async function run() {
         app.post('/foods', async (req, res) => {
             const foodData = req.body
             const result = await foodCollection.insertOne(foodData)
+            res.send(result)
+        })
+
+        //add Food parchase data in DB
+        app.post('/food-parchase', async (req, res) => {
+            const parchaseData = req.body
+            const result = await foodParchaseColleciton.insertOne(parchaseData)
             res.send(result)
         })
 
