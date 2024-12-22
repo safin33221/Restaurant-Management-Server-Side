@@ -61,11 +61,33 @@ async function run() {
             res.send(result)
         })
 
+        //update data in foodcollection
+        app.put('/foods/:id', async (req, res) => {
+            const id = req.params.id
+            const newData = req.body
+            const filter = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    foodName: newData.foodName,
+                    foodImage: newData.foodImage,
+                    foodCategory: newData.foodCategory,
+                    quantity: newData.quantity,
+                    price: newData.price,
+                    foodOrigin: newData.foodOrigin,
+                    description: newData.description,
+                }
+            }
+            const result = await foodCollection.updateOne(filter, updateDoc)
+            res.send(result)
+
+        })
+
 
         //delete food from foodcollection
         app.delete('/foods/:id', async (req, res) => {
             const id = req.params.id
-            console.log(id);
+
             const filter = { _id: new ObjectId(id) }
             const result = await foodCollection.deleteOne(filter)
             res.send(result)
