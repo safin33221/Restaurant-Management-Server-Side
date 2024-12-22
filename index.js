@@ -36,7 +36,14 @@ async function run() {
 
         //get Foods Data from DB
         app.get('/foods', async (req, res) => {
-            const result = await foodCollection.find().toArray()
+            const search = req.query.search
+            let query = {
+                foodName: {
+                    $regex: search, $options: 'i'
+                }
+            }
+
+            const result = await foodCollection.find(query).toArray()
             res.send(result)
         })
         //get single food by id
@@ -87,7 +94,6 @@ async function run() {
         //delete food from foodcollection
         app.delete('/foods/:id', async (req, res) => {
             const id = req.params.id
-
             const filter = { _id: new ObjectId(id) }
             const result = await foodCollection.deleteOne(filter)
             res.send(result)
