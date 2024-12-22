@@ -66,6 +66,11 @@ async function run() {
             const result = await foodCollection.find(query).toArray()
             res.send(result)
         })
+        // get food parchase data from food parchase collection
+        app.get('/food-parchase', async (req, res) => {
+            const result = await foodParchaseColleciton.find().toArray()
+            res.send(result)
+        })
 
         //add Foods data in db
         app.post('/foods', async (req, res) => {
