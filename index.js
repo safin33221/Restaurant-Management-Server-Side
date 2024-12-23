@@ -83,7 +83,20 @@ async function run() {
         //add Food parchase data in DB
         app.post('/food-parchase', async (req, res) => {
             const parchaseData = req.body
+            const foodId = parchaseData.foodId
             const result = await foodParchaseColleciton.insertOne(parchaseData)
+
+
+            //update parchase count
+
+            const filter = { _id: new ObjectId(foodId) }
+            const updateDoc = {
+                $inc: {
+                    Purchase_count: 1
+                }
+            }
+
+            const updateParchaseCount = await foodCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
         //get food parchase ordered by email
@@ -127,7 +140,7 @@ async function run() {
         //delete parchases food data
         app.delete('/food-parchase/:id', async (req, res) => {
             const id = req.params.id
-            
+
             const filter = { _id: new ObjectId(id) }
             const result = await foodParchaseColleciton.deleteOne(filter)
             res.send(result)
