@@ -42,10 +42,11 @@ async function run() {
 
         //get Foods Data from DB
         app.get('/foods', async (req, res) => {
-            const search = req.query.search
+            const search = req.query.search || ''
             let query = {
                 foodName: {
-                    $regex: search, $options: 'i'
+                    $regex: search,
+                    $options: 'i'
                 }
             }
 
@@ -83,6 +84,13 @@ async function run() {
         app.post('/food-parchase', async (req, res) => {
             const parchaseData = req.body
             const result = await foodParchaseColleciton.insertOne(parchaseData)
+            res.send(result)
+        })
+        //get food parchase ordered by email
+        app.get('/parchases-food/:email', async (req, res) => {
+            const email = req.params.email
+            const filter = { email: email }
+            const result = await foodParchaseColleciton.find(filter).toArray()
             res.send(result)
         })
 
