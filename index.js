@@ -1,14 +1,37 @@
 const express = require('express');
 const app = express()
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
+const cookieParse = require('cookie-parser')
 const port = process.env.PORT || 8080
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 
 //middle Ware
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:5173'],
+    credentials: true
+}))
 app.use(express.json())
+app.use(cookieParse())
+
+
+const verifyToken = (req, res, next) => {
+    console.log(req?.cookie?.token);
+    const token = req?.cookies?.token
+    if (!token) {
+        return res.status(401).send({ message: "UnAuthorize Accessed" })
+    }
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: "UnAuthorize Accessed" })
+        }
+        req.user = decoded
+
+        next()
+    })
+}
 
 
 
@@ -40,6 +63,26 @@ async function run() {
 
 
 
+        //Json web token api's
+        app.post('/jwt', async (req, res) => {
+            const user = req.body
+            const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '3h' })
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: false
+
+            }).send({ success: true })
+        })
+
+        app.post('/logOut', async (req, res) => {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: false
+            }).send({ success: true })
+        })
+
+
+
         //get Foods Data from DB
         app.get('/foods', async (req, res) => {
             const search = req.query.search || ''
@@ -61,27 +104,32 @@ async function run() {
             res.send(result)
         })
         //get food data by email
-        app.get('/my-foods/:email', async (req, res) => {
+        app.get('/my-foods/:email', verifyToken, async (req, res) => {
+            console.log(req?.cookies?.token)
             const email = req.params.email
+
+            if (req.user.email !== req.params.email) {
+                return res.status(403).send({message:"Forbidden Access"})
+            }
             const query = { email: email }
             const result = await foodCollection.find(query).toArray()
             res.send(result)
         })
         // get food parchase data from food parchase collection
-        app.get('/food-parchase', async (req, res) => {
+        app.get('/food-parchase', verifyToken, async (req, res) => {
             const result = await foodParchaseColleciton.find().toArray()
             res.send(result)
         })
 
         //add Foods data in db
-        app.post('/foods', async (req, res) => {
+        app.post('/foods',verifyToken, async (req, res) => {
             const foodData = req.body
             const result = await foodCollection.insertOne(foodData)
             res.send(result)
         })
 
         //add Food parchase data in DB
-        app.post('/food-parchase', async (req, res) => {
+        app.post('/food-parchase',verifyToken, async (req, res) => {
             const parchaseData = req.body
             const foodId = parchaseData.foodId
             const result = await foodParchaseColleciton.insertOne(parchaseData)
@@ -100,7 +148,7 @@ async function run() {
             res.send(result)
         })
         //get food parchase ordered by email
-        app.get('/parchases-food/:email', async (req, res) => {
+        app.get('/parchases-food/:email', verifyToken, async (req, res) => {
             const email = req.params.email
             const filter = { email: email }
             const result = await foodParchaseColleciton.find(filter).toArray()
@@ -108,7 +156,7 @@ async function run() {
         })
 
         //update data in foodcollection
-        app.put('/foods/:id', async (req, res) => {
+        app.put('/foods/:id',verifyToken, async (req, res) => {
             const id = req.params.id
             const newData = req.body
             const filter = { _id: new ObjectId(id) }
