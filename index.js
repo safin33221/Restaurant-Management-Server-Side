@@ -123,16 +123,17 @@ async function run() {
 
         //add Foods data in db
         app.post('/foods', verifyToken, async (req, res) => {
-            
+
             const foodData = req.body
             const result = await foodCollection.insertOne(foodData)
             res.send(result)
         })
 
         //add Food parchase data in DB
-        app.post('/food-parchase', verifyToken, async (req, res) => {
-            
+        app.post('/food-parchase', async (req, res) => {
+
             const parchaseData = req.body
+            const foodQuantity = parchaseData.quantity
             const foodId = parchaseData.foodId
             const result = await foodParchaseColleciton.insertOne(parchaseData)
 
@@ -142,7 +143,8 @@ async function run() {
             const filter = { _id: new ObjectId(foodId) }
             const updateDoc = {
                 $inc: {
-                    Purchase_count: 1
+                    Purchase_count: foodQuantity,
+                    quantity: -foodQuantity
                 }
             }
 
@@ -150,11 +152,11 @@ async function run() {
             res.send(result)
         })
         //get food parchase ordered by email
-        app.get('/parchases-food/:email', verifyToken, async (req, res) => {
-            
-            if (req.user.email !== req.params.email) {
-                return res.status(403).send({ message: "Forbidden Access" })
-            }
+        app.get('/parchases-food/:email', async (req, res) => {
+
+            // if (req.user.email !== req.params.email) {
+            //     return res.status(403).send({ message: "Forbidden Access" })
+            // }
             const email = req.params.email
             const filter = { email: email }
             const result = await foodParchaseColleciton.find(filter).toArray()
