@@ -109,7 +109,7 @@ async function run() {
             const email = req.params.email
 
             if (req.user.email !== req.params.email) {
-                return res.status(403).send({message:"Forbidden Access"})
+                return res.status(403).send({ message: "Forbidden Access" })
             }
             const query = { email: email }
             const result = await foodCollection.find(query).toArray()
@@ -122,14 +122,16 @@ async function run() {
         })
 
         //add Foods data in db
-        app.post('/foods',verifyToken, async (req, res) => {
+        app.post('/foods', verifyToken, async (req, res) => {
+            
             const foodData = req.body
             const result = await foodCollection.insertOne(foodData)
             res.send(result)
         })
 
         //add Food parchase data in DB
-        app.post('/food-parchase',verifyToken, async (req, res) => {
+        app.post('/food-parchase', verifyToken, async (req, res) => {
+            
             const parchaseData = req.body
             const foodId = parchaseData.foodId
             const result = await foodParchaseColleciton.insertOne(parchaseData)
@@ -149,6 +151,10 @@ async function run() {
         })
         //get food parchase ordered by email
         app.get('/parchases-food/:email', verifyToken, async (req, res) => {
+            
+            if (req.user.email !== req.params.email) {
+                return res.status(403).send({ message: "Forbidden Access" })
+            }
             const email = req.params.email
             const filter = { email: email }
             const result = await foodParchaseColleciton.find(filter).toArray()
@@ -156,10 +162,11 @@ async function run() {
         })
 
         //update data in foodcollection
-        app.put('/foods/:id',verifyToken, async (req, res) => {
+        app.put('/foods/:id', async (req, res) => {
             const id = req.params.id
             const newData = req.body
             const filter = { _id: new ObjectId(id) }
+
 
             const updateDoc = {
                 $set: {
