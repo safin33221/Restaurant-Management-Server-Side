@@ -10,7 +10,11 @@ require('dotenv').config()
 
 //middle Ware
 app.use(cors({
-    origin: ['http://localhost:5173'],
+    origin: [
+        'http://localhost:5173',
+        'https://restaurant-management-caeb2.web.app',
+        'https://restaurant-management-caeb2.firebaseapp.com'
+    ],
     credentials: true
 }))
 app.use(express.json())
@@ -69,7 +73,8 @@ async function run() {
             const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '3h' })
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: false
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 
             }).send({ success: true })
         })
@@ -77,7 +82,8 @@ async function run() {
         app.post('/logOut', async (req, res) => {
             res.clearCookie('token', {
                 httpOnly: true,
-                secure: false
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
             }).send({ success: true })
         })
 
@@ -111,6 +117,7 @@ async function run() {
             if (req.user.email !== req.params.email) {
                 return res.status(403).send({ message: "Forbidden Access" })
             }
+
             const query = { email: email }
             const result = await foodCollection.find(query).toArray()
             res.send(result)
@@ -125,11 +132,11 @@ async function run() {
 
 
         //get food parchase ordered by email
-        app.get('/parchases-food/:email', async (req, res) => {
+        app.get('/parchases-food/:email', verifyToken, async (req, res) => {
 
-            // if (req.user.email !== req.params.email) {
-            //     return res.status(403).send({ message: "Forbidden Access" })
-            // }
+            if (req.user.email !== req.params.email) {
+                return res.status(403).send({ message: "Forbidden Access" })
+            }
             const email = req.params.email
             const filter = { email: email }
             const result = await foodParchaseColleciton.find(filter).toArray()
@@ -228,8 +235,8 @@ async function run() {
 
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        // await client.db("admin").command({ ping: 1 });
+        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
