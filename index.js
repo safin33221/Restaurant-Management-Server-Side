@@ -81,7 +81,7 @@ async function run() {
             }).send({ success: true })
         })
 
-
+        //<<<<<<<<<<<<<< Get Oparation >>>>>>>>>>>>>>>>
 
         //get Foods Data from DB
         app.get('/foods', async (req, res) => {
@@ -121,6 +121,31 @@ async function run() {
             res.send(result)
         })
 
+
+
+
+        //get food parchase ordered by email
+        app.get('/parchases-food/:email', async (req, res) => {
+
+            // if (req.user.email !== req.params.email) {
+            //     return res.status(403).send({ message: "Forbidden Access" })
+            // }
+            const email = req.params.email
+            const filter = { email: email }
+            const result = await foodParchaseColleciton.find(filter).toArray()
+            res.send(result)
+        })
+
+        //get top 6 parchased foods
+        app.get('/top-foods', async (req, res) => {
+            const result = await foodCollection.find().sort({ Purchase_count: -1 }).limit(6).toArray()
+            res.send(result)
+        })
+
+
+
+        //<<<<<<<<<<<<<< Post Oparation >>>>>>>>>>>>>>>>
+
         //add Foods data in db
         app.post('/foods', verifyToken, async (req, res) => {
 
@@ -151,17 +176,10 @@ async function run() {
             const updateParchaseCount = await foodCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
-        //get food parchase ordered by email
-        app.get('/parchases-food/:email', async (req, res) => {
 
-            // if (req.user.email !== req.params.email) {
-            //     return res.status(403).send({ message: "Forbidden Access" })
-            // }
-            const email = req.params.email
-            const filter = { email: email }
-            const result = await foodParchaseColleciton.find(filter).toArray()
-            res.send(result)
-        })
+
+
+        //<<<<<<<<<<<<<< Put Oparation >>>>>>>>>>>>>>>>
 
         //update data in foodcollection
         app.put('/foods/:id', async (req, res) => {
@@ -185,6 +203,11 @@ async function run() {
             res.send(result)
 
         })
+
+
+
+
+        //<<<<<<<<<<<<<< Delete Oparation >>>>>>>>>>>>>>>>
 
 
         //delete food from foodcollection
