@@ -22,7 +22,7 @@ app.use(cookieParse())
 
 
 const verifyToken = (req, res, next) => {
-    console.log(req?.cookie?.token);
+    
     const token = req?.cookies?.token
     if (!token) {
         return res.status(401).send({ message: "UnAuthorize Accessed" })
@@ -69,7 +69,7 @@ async function run() {
 
         //Json web token api's
         app.post('/jwt', async (req, res) => {
-            const user = req.body
+            const user = req?.body
             const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '3h' })
             res.cookie('token', token, {
                 httpOnly: true,
@@ -91,7 +91,7 @@ async function run() {
 
         //get Foods Data from DB
         app.get('/foods', async (req, res) => {
-            const search = req.query.search || ''
+            const search = req?.query?.search || ''
             let query = {
                 foodName: {
                     $regex: search,
@@ -111,10 +111,10 @@ async function run() {
         })
         //get food data by email
         app.get('/my-foods/:email', verifyToken, async (req, res) => {
-            console.log(req?.cookies?.token)
-            const email = req.params.email
+           
+            const email = req?.params?.email
 
-            if (req.user.email !== req.params.email) {
+            if (req.user.email !== req?.params?.email) {
                 return res.status(403).send({ message: "Forbidden Access" })
             }
 
@@ -162,7 +162,7 @@ async function run() {
         })
 
         //add Food parchase data in DB
-        app.post('/food-parchase', async (req, res) => {
+        app.post('/food-parchase', verifyToken, async (req, res) => {
 
             const parchaseData = req.body
             const foodQuantity = parchaseData.quantity
@@ -189,7 +189,7 @@ async function run() {
         //<<<<<<<<<<<<<< Put Oparation >>>>>>>>>>>>>>>>
 
         //update data in foodcollection
-        app.put('/foods/:id', async (req, res) => {
+        app.put('/foods/:id', verifyToken, async (req, res) => {
             const id = req.params.id
             const newData = req.body
             const filter = { _id: new ObjectId(id) }
@@ -218,14 +218,14 @@ async function run() {
 
 
         //delete food from foodcollection
-        app.delete('/foods/:id', async (req, res) => {
+        app.delete('/foods/:id', verifyToken, async (req, res) => {
             const id = req.params.id
             const filter = { _id: new ObjectId(id) }
             const result = await foodCollection.deleteOne(filter)
             res.send(result)
         })
         //delete parchases food data
-        app.delete('/food-parchase/:id', async (req, res) => {
+        app.delete('/food-parchase/:id', verifyToken, async (req, res) => {
             const id = req.params.id
 
             const filter = { _id: new ObjectId(id) }
