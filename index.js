@@ -22,7 +22,7 @@ app.use(cookieParse())
 
 
 const verifyToken = (req, res, next) => {
-    
+
     const token = req?.cookies?.token
     if (!token) {
         return res.status(401).send({ message: "UnAuthorize Accessed" })
@@ -64,6 +64,8 @@ async function run() {
 
         //Food Parchase collection
         const foodParchaseColleciton = client.db('RestaurantManagement').collection('parchase')
+        //branches data collection
+        const branchesDataColleciton = client.db('RestaurantManagement').collection('branches')
 
 
 
@@ -111,7 +113,7 @@ async function run() {
         })
         //get food data by email
         app.get('/my-foods/:email', verifyToken, async (req, res) => {
-           
+
             const email = req?.params?.email
 
             if (req.user.email !== req?.params?.email) {
@@ -146,6 +148,11 @@ async function run() {
         //get top 6 parchased foods
         app.get('/top-foods', async (req, res) => {
             const result = await foodCollection.find().sort({ Purchase_count: -1 }).limit(6).toArray()
+            res.send(result)
+        })
+        //get branches data
+        app.get('/branches', async (req, res) => {
+            const result = await branchesDataColleciton.find().toArray()
             res.send(result)
         })
 
