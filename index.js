@@ -94,6 +94,10 @@ async function run() {
         //get Foods Data from DB
         app.get('/foods', async (req, res) => {
             const search = req?.query?.search || ''
+            const sort = req?.query?.sort || 'ascending'
+            const sortOrder = sort === "ascending" ? +1 : -1
+            
+            
             let query = {
                 foodName: {
                     $regex: search,
@@ -101,7 +105,8 @@ async function run() {
                 }
             }
 
-            const result = await foodCollection.find(query).toArray()
+            const result = await foodCollection.find(query).sort({price: sortOrder}).toArray()
+         
             res.send(result)
         })
         //get single food by id
@@ -147,7 +152,7 @@ async function run() {
 
         //get top 6 parchased foods
         app.get('/top-foods', async (req, res) => {
-            const result = await foodCollection.find().sort({ Purchase_count: -1 }).limit(6).toArray()
+            const result = await foodCollection.find().sort({ Purchase_count: -1 }).limit(8).toArray()
             res.send(result)
         })
         //get branches data
