@@ -66,6 +66,7 @@ async function run() {
         const foodParchaseColleciton = client.db('RestaurantManagement').collection('parchase')
         //branches data collection
         const branchesDataColleciton = client.db('RestaurantManagement').collection('branches')
+        const feedbackDataColleciton = client.db('RestaurantManagement').collection('feedback')
 
 
 
@@ -96,8 +97,8 @@ async function run() {
             const search = req?.query?.search || ''
             const sort = req?.query?.sort || 'ascending'
             const sortOrder = sort === "ascending" ? +1 : -1
-            
-            
+
+
             let query = {
                 foodName: {
                     $regex: search,
@@ -105,8 +106,8 @@ async function run() {
                 }
             }
 
-            const result = await foodCollection.find(query).sort({price: sortOrder}).toArray()
-         
+            const result = await foodCollection.find(query).sort({ price: sortOrder }).toArray()
+
             res.send(result)
         })
         //get single food by id
@@ -242,6 +243,18 @@ async function run() {
 
             const filter = { _id: new ObjectId(id) }
             const result = await foodParchaseColleciton.deleteOne(filter)
+            res.send(result)
+        })
+
+
+        //------------------Manage feed Back----------------
+        app.post('/feedback', async (req, res) => {
+            const feedback = req.body
+            const result = await feedbackDataColleciton.insertOne(feedback)
+            res.send(result)
+        })
+        app.get('/feedback', async (req, res) => {
+            const result = await feedbackDataColleciton.find().toArray()
             res.send(result)
         })
 
